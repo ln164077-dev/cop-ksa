@@ -1,19 +1,108 @@
-export type TeamFlagCode = "IRQ" | "OMA" | "KSA" | "KUW" | "UAE" | "YEM" | "QAT" | "BHR" | "TBD";
+export type TeamFlagCode = "IRQ" | "OMA" | "KSA" | "KUW" | "UAE" | "YEM" | "QAT" | "BHR" | "TBD" | string;
+
+type CountryFlagRecord = { code: string; flagUrl: string; names: string[] };
 
 const aliases: Record<string, TeamFlagCode> = {
   "العراق": "IRQ",
-  "السعودية": "KSA",
+  "عراق": "IRQ",
+  "iraq": "IRQ",
+  "العمان": "OMA",
   "عُمان": "OMA",
   "عمان": "OMA",
+  "oman": "OMA",
+  "السعودية": "KSA",
+  "السعوديه": "KSA",
+  "سعودية": "KSA",
+  "سعوديه": "KSA",
+  "السعوديه العربيه": "KSA",
+  "saudiarabia": "KSA",
+  "saudi": "KSA",
   "الكويت": "KUW",
+  "كويت": "KUW",
+  "kuwait": "KUW",
   "الإمارات": "UAE",
   "الامارات": "UAE",
+  "امارات": "UAE",
+  "الامارات العربيه المتحده": "UAE",
+  "unitedarabemirates": "UAE",
+  "uae": "UAE",
   "قطر": "QAT",
+  "qatar": "QAT",
   "البحرين": "BHR",
+  "بحرين": "BHR",
+  "bahrain": "BHR",
   "اليمن": "YEM",
+  "يمن": "YEM",
+  "yemen": "YEM",
 };
 
+function normalize(value: string) {
+  return value
+    .toLocaleLowerCase("ar")
+    .normalize("NFKD")
+    .replace(/[\u064B-\u065F\u0670]/g, "")
+    .replace(/[إأآٱ]/g, "ا")
+    .replace(/[ىئ]/g, "ي")
+    .replace(/[ؤ]/g, "و")
+    .replace(/[ة]/g, "ه")
+    .replace(/ال/g, "")
+    .replace(/[\s\-_.,'’`]/g, "")
+    .replace(/[^\u0600-\u06ffa-z0-9]/g, "");
+}
+
+function distance(a: string, b: string) {
+  const row = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= a.length; i += 1) {
+    let diagonal = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      const above = row[j];
+      row[j] = a[i - 1] === b[j - 1] ? diagonal : Math.min(row[j] + 1, row[j - 1] + 1, diagonal + 1);
+      diagonal = above;
+    }
+  }
+  return row[b.length];
+}
+
+const aliasEntries = Object.entries(aliases).map(([name, code]) => ({ name: normalize(name), code }));
+
 export function teamFlagCode(teamName: string | null | undefined): TeamFlagCode {
-  const normalized = (teamName ?? "").trim().replace(/[إأآ]/g, "ا").replace(/ى/g, "ي");
-  return aliases[normalized] ?? "TBD";
+  const normalized = normalize(teamName ?? "");
+  if (!normalized) return "TBD";
+  const exact = aliasEntries.find(entry => normalize(entry.name) === normalized);
+  if (exact) return exact.code;
+  const fuzzy = aliasEntries
+    .map(entry => ({ ...entry, score: distance(normalized, entry.name) }))
+    .sort((a, b) => a.score - b.score)[0];
+  return fuzzy && fuzzy.score <= Math.max(1, Math.floor(normalized.length * 0.32)) ? fuzzy.code : "TBD";
+}
+
+let countryCatalogPromise: Promise<CountryFlagRecord[]> | null = null;
+
+async function countryCatalog() {
+  if (!countryCatalogPromise) {
+    countryCatalogPromise = fetch("https://restcountries.com/v3.1/all?fields=name,cca2,flags,translations")
+      .then(response => response.ok ? response.json() : [])
+      .then((countries: Array<{ cca2?: string; name?: { common?: string; official?: string }; flags?: { png?: string; svg?: string }; translations?: Record<string, { common?: string; official?: string }> }>) => countries
+        .filter(country => country.cca2 && country.flags?.png)
+        .map(country => ({ code: country.cca2!, flagUrl: country.flags!.png!, names: [country.name?.common, country.name?.official, country.cca2, ...Object.values(country.translations ?? {}).flatMap(translation => [translation.common, translation.official])].filter(Boolean) as string[] })))
+      .catch(() => []);
+  }
+  return countryCatalogPromise;
+}
+
+export async function remoteTeamFlag(teamName: string): Promise<{ code: string; flagUrl: string } | null> {
+  const normalized = normalize(teamName);
+  if (!normalized) return null;
+  const countries = await countryCatalog();
+  const ranked = countries.map(country => {
+    const scores = country.names.map(name => {
+      const candidate = normalize(name);
+      return candidate === normalized ? 0 : distance(normalized, candidate);
+    });
+    return { country, score: Math.min(...scores) };
+  }).sort((a, b) => a.score - b.score)[0];
+  if (!ranked) return null;
+  const threshold = Math.max(2, Math.floor(normalized.length * 0.38));
+  return ranked.score <= threshold ? { code: ranked.country.code, flagUrl: ranked.country.flagUrl } : null;
 }

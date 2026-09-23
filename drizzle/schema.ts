@@ -52,6 +52,7 @@ export const matches = pgTable("matches", {
   ticketLabel: varchar("ticket_label", { length: 120 }).notNull(),
   accentColor: varchar("accent_color", { length: 30 }).default("emerald").notNull(),
   isPublished: boolean("is_published").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
   note: text("note"),
   sourceJson: text("source_json"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

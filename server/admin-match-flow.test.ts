@@ -32,4 +32,19 @@ describe("admin match flow", () => {
       await caller.matches.delete({ id: created.id });
     }
   });
+
+  it("moves a match upward and preserves the new order", async () => {
+    const caller = appRouter.createCaller(adminContext());
+    const suffix = Date.now();
+    const first = await caller.matches.create({ slug: `order-first-${suffix}`, competition: "اختبار الترتيب", round: "اختبار", homeTeam: "العراق", awayTeam: "عمان", venue: "ملعب الاختبار", city: "جدة", matchDate: new Date(Date.now() + 86400000).toISOString(), matchTime: "07:00 مساءً", homeScore: null, awayScore: null, status: "available", ticketLabel: "التذاكر متاحة الآن", accentColor: "emerald", isPublished: true });
+    const second = await caller.matches.create({ slug: `order-second-${suffix}`, competition: "اختبار الترتيب", round: "اختبار", homeTeam: "قطر", awayTeam: "البحرين", venue: "ملعب الاختبار", city: "الدوحة", matchDate: new Date(Date.now() + 86400000).toISOString(), matchTime: "08:00 مساءً", homeScore: null, awayScore: null, status: "available", ticketLabel: "التذاكر متاحة الآن", accentColor: "emerald", isPublished: true });
+    try {
+      await caller.matches.move({ id: second.id, direction: "up" });
+      const ordered = await caller.matches.listAdmin();
+      expect(ordered.findIndex(match => match.id === second.id)).toBeLessThan(ordered.findIndex(match => match.id === first.id));
+    } finally {
+      await caller.matches.delete({ id: first.id });
+      await caller.matches.delete({ id: second.id });
+    }
+  });
 });

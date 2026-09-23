@@ -1,4 +1,4 @@
-import { and, asc, count, eq, lt, ne } from "drizzle-orm";
+import { and, asc, count, eq, lt, max, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { adminCredentials, InsertMatch, InsertUser, matches, users } from "../drizzle/schema";
@@ -32,6 +32,7 @@ export type MatchInput = {
   awayScore?: number | null;
   timezone?: string;
   note?: string | null;
+  sortOrder?: number;
 };
 
 const teamShort: Record<string, string> = {
@@ -189,7 +190,7 @@ function serializeMatchInput(input: MatchInput, includeMatchNumber = false): Par
     sourceJson: JSON.stringify(input),
   };
   return includeMatchNumber
-    ? { ...baseValues, matchNumber: input.matchNumber ?? Math.floor(Date.now() / 1000) }
+    ? { ...baseValues, matchNumber: input.matchNumber ?? Math.floor(Date.now() / 1000), sortOrder: input.sortOrder ?? input.matchNumber ?? 0 }
     : baseValues;
 }
 
@@ -211,7 +212,7 @@ export async function listPublishedMatches() {
   await syncFinishedMatches();
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(matches).where(eq(matches.isPublished, true)).orderBy(asc(matches.matchDate));
+  return db.select().from(matches).where(eq(matches.isPublished, true)).orderBy(asc(matches.sortOrder), asc(matches.matchDate), asc(matches.id));
 }
 
 export async function listAllMatches() {
@@ -219,7 +220,7 @@ export async function listAllMatches() {
   await syncFinishedMatches();
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(matches).orderBy(asc(matches.matchDate));
+  return db.select().from(matches).orderBy(asc(matches.sortOrder), asc(matches.matchDate), asc(matches.id));
 }
 
 export async function syncFinishedMatches() {
@@ -232,8 +233,27 @@ export async function syncFinishedMatches() {
 export async function createMatch(input: MatchInput) {
   const db = await getDb();
   if (!db) throw new Error("قاعدة البيانات غير متاحة");
-  const [created] = await db.insert(matches).values(serializeMatchInput(input, true) as InsertMatch).returning({ id: matches.id });
+  const currentMax = await db.select({ value: max(matches.sortOrder) }).from(matches);
+  const nextOrder = Number(currentMax[0]?.value ?? 0) + 1;
+  const [created] = await db.insert(matches).values({ ...serializeMatchInput(input, true), sortOrder: nextOrder } as InsertMatch).returning({ id: matches.id });
   return { id: created.id };
+}
+
+export async function moveMatch(id: number, direction: "up" | "down") {
+  const db = await getDb();
+  if (!db) throw new Error("قاعدة البيانات غير متاحة");
+  return db.transaction(async tx => {
+    const rows = await tx.select({ id: matches.id, sortOrder: matches.sortOrder }).from(matches).orderBy(asc(matches.sortOrder), asc(matches.matchDate), asc(matches.id));
+    const currentIndex = rows.findIndex(row => row.id === id);
+    if (currentIndex < 0) return { id, moved: false };
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= rows.length) return { id, moved: false };
+    const currentOrder = rows[currentIndex].sortOrder;
+    const targetOrder = rows[targetIndex].sortOrder;
+    await tx.update(matches).set({ sortOrder: targetOrder }).where(eq(matches.id, id));
+    await tx.update(matches).set({ sortOrder: currentOrder }).where(eq(matches.id, rows[targetIndex].id));
+    return { id, moved: true };
+  });
 }
 
 export async function updateMatch(id: number, input: MatchInput) {

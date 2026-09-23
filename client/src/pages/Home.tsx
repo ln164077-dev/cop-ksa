@@ -1,9 +1,9 @@
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { CalendarDays, MapPin, SlidersHorizontal, Ticket, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { teamFlagCode } from "@shared/team-flags";
+import { remoteTeamFlag, teamFlagCode } from "@shared/team-flags";
 import { GlobalFooter, GlobalHeader } from "@/components/GlobalChrome";
 
 type MatchItem = {
@@ -32,6 +32,17 @@ function dateText(value: Date | string) {
 
 function Flag({ teamName }: { teamName: string }) {
   const code = teamFlagCode(teamName);
+  const [remoteFlag, setRemoteFlag] = useState<{ code: string; flagUrl: string } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (code !== "TBD") {
+      setRemoteFlag(null);
+      return () => { cancelled = true; };
+    }
+    remoteTeamFlag(teamName).then(result => { if (!cancelled) setRemoteFlag(result); });
+    return () => { cancelled = true; };
+  }, [code, teamName]);
+  if (remoteFlag) return <div className="template-flag-box"><img src={remoteFlag.flagUrl} alt={teamName} loading="lazy" /></div>;
   return <div className="template-flag-box"><svg viewBox="0 0 900 600" aria-label={teamName}><use href={`#${flagIds[code] ?? "flag-tbd"}`} /></svg></div>;
 }
 

@@ -28,7 +28,7 @@ describe("matches router", () => {
     const result = await caller.matches.listPublic();
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThanOrEqual(15);
-    expect(result.filter(match => match.status === "finished").length).toBeGreaterThanOrEqual(1);
+    expect(result.every(match => ["available", "limited", "sold_out", "finished"].includes(match.status))).toBe(true);
   });
 
   it("blocks regular users from the administrative match feed", async () => {

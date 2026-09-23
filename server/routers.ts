@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { systemRouter } from "./_core/systemRouter";
-import { createMatch, deleteMatch, listAllMatches, listPublishedMatches, updateMatch } from "./db";
+import { createMatch, deleteMatch, listAllMatches, listPublishedMatches, moveMatch, updateMatch } from "./db";
 
 const matchInput = z.object({
   slug: z.string().min(3).max(160),
@@ -40,6 +40,7 @@ export const appRouter = router({
     update: adminProcedure
       .input(z.object({ id: z.number().int().positive(), data: matchInput }))
       .mutation(({ input }) => updateMatch(input.id, input.data)),
+    move: adminProcedure.input(z.object({ id: z.number().int().positive(), direction: z.enum(["up", "down"]) })).mutation(({ input }) => moveMatch(input.id, input.direction)),
     delete: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => deleteMatch(input.id)),
   }),
 });
