@@ -223,6 +223,14 @@ export async function listAllMatches() {
   return db.select().from(matches).orderBy(asc(matches.sortOrder), asc(matches.matchDate), asc(matches.id));
 }
 
+export async function getMatchById(id: number) {
+  await ensureSeeded();
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(matches).where(eq(matches.id, id)).limit(1);
+  return result[0];
+}
+
 export async function syncFinishedMatches() {
   const db = await getDb();
   if (!db) return 0;
