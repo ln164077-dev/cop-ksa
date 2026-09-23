@@ -1,9 +1,10 @@
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { CalendarDays, CircleUserRound, Menu, MapPin, ShoppingBag, SlidersHorizontal, Ticket, X } from "lucide-react";
+import { CalendarDays, MapPin, SlidersHorizontal, Ticket, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { teamFlagCode } from "@shared/team-flags";
+import { GlobalFooter, GlobalHeader } from "@/components/GlobalChrome";
 
 type MatchItem = {
   id: number;
@@ -66,15 +67,9 @@ export default function Home() {
 
   return (
     <main dir="rtl" className="template-page">
+      <GlobalHeader />
       <FlagDefinitions />
       <div className="template-shell">
-        <header className="template-header">
-          <div className="template-header-controls">
-            <button aria-label="السلة"><ShoppingBag size={19} /></button><i /><Link href="/admin" aria-label="حسابي"><CircleUserRound size={21} /></Link><i /><button className="template-language">▣ AR</button>
-          </div>
-          <div className="template-brand"><span>🏆</span><strong>كأس الخليج العربي 27<small>2026 - السعودية</small></strong><button aria-label="القائمة"><Menu size={25} /></button></div>
-        </header>
-
         <div className="template-results-bar">
           <button className="template-filter-btn" onClick={() => setFilterOpen(value => !value)}><SlidersHorizontal size={13} /> خيارات التصفية</button>
           <div><b>{list.length}</b> <span>النتائج</span></div>
@@ -99,8 +94,8 @@ export default function Home() {
           {!isLoading && list.length === 0 && <div className="template-empty">لا توجد مباريات مطابقة</div>}
         </section>
 
-        <footer className="template-footer"><div className="template-footer-brand">ticketmaster<sup>®</sup> <small>Powered by</small></div><div className="template-footer-links"><a href="#">الشروط والأحكام العامة</a><a href="#">سياسة الخصوصية</a><a href="#">تواصل معنا</a><a href="#">الأسئلة الشائعة حول التذاكر</a><Link href="/admin">الإدارة</Link></div></footer>
       </div>
+      <GlobalFooter />
 
       {selected && <div className="compact-modal-backdrop" onMouseDown={() => setSelected(null)}><section className="compact-modal" onMouseDown={event => event.stopPropagation()}><button className="compact-close" onClick={() => setSelected(null)}><X size={18} /></button><div className="compact-modal-flags"><Flag teamName={selected.homeTeam} /><b>VS</b><Flag teamName={selected.awayTeam} /></div><h2>{selected.homeTeam} <span>ضد</span> {selected.awayTeam}</h2><p>{dateText(selected.matchDate)}</p><p>{selected.venue ?? "يحدد لاحقًا"}، {selected.city}</p>{selected.status === "finished" ? <strong className="modal-score">النتيجة {selected.homeScore} — {selected.awayScore}</strong> : <button className="modal-book" onClick={() => { setSelected(null); navigate(`/booking/seats?matchId=${selected.id}`); }}>متابعة الحجز</button>}</section></div>}
     </main>

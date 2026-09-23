@@ -2,9 +2,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { ArrowRight, CalendarDays, CheckCircle2, ClipboardList, Edit3, LoaderCircle, LogOut, Plus, ShieldCheck, Ticket, Trash2 } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, ClipboardList, Edit3, LoaderCircle, Plus, ShieldCheck, Ticket, Trash2 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { Link } from "wouter";
+import { GlobalFooter, GlobalHeader } from "@/components/GlobalChrome";
 
 type FormValues = {
   slug: string;
@@ -129,21 +130,17 @@ export default function Admin() {
     else createMutation.mutate(payload);
   }
 
-  if (loading) return <div className="admin-loading" dir="rtl"><LoaderCircle className="spin" size={28} /> جاري تجهيز لوحة التحكم…</div>;
+  if (loading) return <main className="admin-shell" dir="rtl"><GlobalHeader /><div className="admin-loading"><LoaderCircle className="spin" size={28} /> جاري تجهيز لوحة التحكم…</div><GlobalFooter /></main>;
 
   if (!user) {
     return (
-      <main dir="rtl" className="admin-gate">
-        <div className="admin-gate-card"><span className="gate-icon"><ShieldCheck size={28} /></span><p className="section-kicker">دخول آمن</p><h1>لوحة إدارة المباريات</h1><p>سجّل الدخول بحساب المالك للوصول إلى إضافة المباريات وتعديلها وحذفها.</p><button onClick={() => startLogin()}>تسجيل الدخول <ArrowRight size={18} /></button><Link href="/">العودة للموقع</Link></div>
-      </main>
+      <main dir="rtl" className="admin-shell"><GlobalHeader /><div className="admin-gate"><div className="admin-gate-card"><span className="gate-icon"><ShieldCheck size={28} /></span><p className="section-kicker">دخول آمن</p><h1>لوحة إدارة المباريات</h1><p>سجّل الدخول بحساب المالك للوصول إلى إضافة المباريات وتعديلها وحذفها.</p><button onClick={() => startLogin()}>تسجيل الدخول <ArrowRight size={18} /></button><Link href="/">العودة للموقع</Link></div></div><GlobalFooter /></main>
     );
   }
 
   if (!isAdmin) {
     return (
-      <main dir="rtl" className="admin-gate">
-        <div className="admin-gate-card"><span className="gate-icon"><ShieldCheck size={28} /></span><p className="section-kicker">صلاحية مطلوبة</p><h1>لا تملك صلاحية الإدارة</h1><p>يُمنح دور المسؤول تلقائيًا لصاحب المشروع. استخدم حساب المالك أو حدّث دور المستخدم من قاعدة البيانات.</p><Link className="gate-return" href="/">العودة للموقع</Link></div>
-      </main>
+      <main dir="rtl" className="admin-shell"><GlobalHeader /><div className="admin-gate"><div className="admin-gate-card"><span className="gate-icon"><ShieldCheck size={28} /></span><p className="section-kicker">صلاحية مطلوبة</p><h1>لا تملك صلاحية الإدارة</h1><p>يُمنح دور المسؤول تلقائيًا لصاحب المشروع. استخدم حساب المالك أو حدّث دور المستخدم من قاعدة البيانات.</p><Link className="gate-return" href="/">العودة للموقع</Link></div></div><GlobalFooter /></main>
     );
   }
 
@@ -151,10 +148,7 @@ export default function Admin() {
 
   return (
     <main dir="rtl" className="admin-shell">
-      <header className="admin-header">
-        <Link href="/" className="admin-brand"><span><Ticket size={18} /></span> مدرج <small>إدارة المحتوى</small></Link>
-        <div className="admin-user"><span><b>{user.name?.slice(0, 1) || "م"}</b>{user.name || "مدير الموقع"}</span><button onClick={logout} aria-label="تسجيل الخروج"><LogOut size={17} /></button></div>
-      </header>
+      <GlobalHeader onLogout={logout} />
 
       <div className="admin-layout">
         <aside className="admin-sidebar">
@@ -199,6 +193,7 @@ export default function Admin() {
           </section>
         </section>
       </div>
+      <GlobalFooter />
     </main>
   );
 }

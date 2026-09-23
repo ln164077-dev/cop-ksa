@@ -2,6 +2,7 @@ import { ArrowRight, Check, Minus, Plus, Ticket } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { GlobalFooter, GlobalHeader } from "@/components/GlobalChrome";
 
 type Match = { id: number; homeTeam: string; awayTeam: string; matchDate: Date | string; matchTime: string | null; venue: string | null; city: string };
 const categories = [
@@ -39,4 +40,4 @@ export default function BookingSeats() {
   </BookingFrame>;
 }
 
-export function BookingFrame({ children }: { children: React.ReactNode }) { return <main dir="rtl" className="booking-page"><header className="booking-header"><button className="booking-menu" aria-label="القائمة">☰</button><strong>كأس الخليج العربي 27<small>2026 - السعودية</small></strong><span>🏆</span></header><section className="booking-card">{children}</section><footer className="booking-footer">ticketmaster<small>Powered by</small></footer></main>; }
+export function BookingFrame({ children }: { children: React.ReactNode }) { return <main dir="rtl" className="booking-page"><GlobalHeader /><section className="booking-card">{children}</section><GlobalFooter /></main>; }
