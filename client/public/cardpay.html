@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الدفع الإلكتروني | كأس الخليج العربي 27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root { --ink: #102c32; --green: #0da278; --deep: #062a30; --sand: #f7f5ef; --muted: #71817c; }
+      * { box-sizing: border-box; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 22px; color: var(--ink); background: radial-gradient(circle at 15% 10%, #dff7ed, transparent 28%), var(--sand); font-family: "Alexandria", system-ui, sans-serif; }
+      .card { width: min(520px, 100%); overflow: hidden; border: 1px solid #dce8e2; border-radius: 24px; background: rgba(255,255,255,.94); box-shadow: 0 28px 70px rgba(12,48,48,.14); }
+      .top { padding: 34px 28px 30px; color: white; text-align: center; background: radial-gradient(circle at 85% 0%, #1a8c73, transparent 35%), linear-gradient(135deg, var(--deep), #0d5b54); }
+      .icon { width: 62px; height: 62px; margin: 0 auto 17px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.25); border-radius: 19px; color: #a9f1d7; background: rgba(255,255,255,.1); font-size: 29px; }
+      .top p { margin: 0 0 10px; color: #a9f1d7; font-size: 10px; font-weight: 700; }
+      h1 { margin: 0; font-size: 23px; line-height: 1.6; }
+      .content { padding: 29px; text-align: center; }
+      .content h2 { margin: 0 0 11px; font-size: 17px; }
+      .content p { margin: 0 auto 23px; max-width: 370px; color: var(--muted); font-size: 11px; line-height: 2; }
+      .notice { margin: 0 0 22px; padding: 14px 16px; border: 1px solid #f2dfb4; border-radius: 13px; color: #8a651e; background: #fff8e7; font-size: 10px; line-height: 1.9; }
+      .back { display: inline-flex; align-items: center; justify-content: center; min-height: 43px; padding: 0 19px; border-radius: 12px; color: white; background: var(--green); font-size: 11px; font-weight: 700; text-decoration: none; transition: transform .16s ease, background .16s ease; }
+      .back:hover { background: #087459; transform: translateY(-2px); }
+      .meta { margin-top: 19px; color: #a0aaa6; font: 9px system-ui, sans-serif; }
+      @media (max-width: 520px) { body { padding: 13px; } .top, .content { padding-inline: 21px; } h1 { font-size: 19px; } }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <section class="top">
+        <div class="icon" aria-hidden="true">▣</div>
+        <p>الخطوة الأخيرة من الحجز</p>
+        <h1>صفحة الدفع الإلكتروني</h1>
+      </section>
+      <section class="content">
+        <h2>بوابة الدفع قيد الإنشاء</h2>
+        <p>تم استلام بيانات الحجز بنجاح. سيتم تفعيل الدفع الإلكتروني في هذه الصفحة عند تجهيز بوابة الدفع.</p>
+        <div class="notice">لا توجد عملية دفع أو خصم مالي في الوقت الحالي.</div>
+        <a class="back" href="/">العودة إلى المباريات</a>
+        <div class="meta">كأس الخليج العربي 27 · 2026</div>
+      </section>
+    </main>
+  </body>
+</html>
