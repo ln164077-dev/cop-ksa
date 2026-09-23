@@ -17,7 +17,7 @@ export default function BookingSeats() {
   const [, navigate] = useLocation();
   const params = new URLSearchParams(window.location.search);
   const matchId = Number(params.get("matchId"));
-  const { data: matches = [], isLoading } = trpc.matches.listPublic.useQuery();
+  const { data: matches = [], isLoading } = trpc.matches.listPublic.useQuery(undefined, { refetchInterval: 60_000 });
   const match = (matches as Match[]).find(item => item.id === matchId);
   const [category, setCategory] = useState(categories[1].id);
   const [quantity, setQuantity] = useState(1);

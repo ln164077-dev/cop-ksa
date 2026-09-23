@@ -54,7 +54,7 @@ function FlagDefinitions() {
 }
 
 export default function Home() {
-  const { data: matches = [], isLoading } = trpc.matches.listPublic.useQuery();
+  const { data: matches = [], isLoading } = trpc.matches.listPublic.useQuery(undefined, { refetchInterval: 60_000 });
   const [, navigate] = useLocation();
   const [selected, setSelected] = useState<MatchItem | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);

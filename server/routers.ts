@@ -15,6 +15,8 @@ const matchInput = z.object({
   city: z.string().min(2).max(100),
   matchDate: z.string().datetime(),
   matchTime: z.string().min(2).max(30),
+  homeScore: z.number().int().min(0).nullable().optional(),
+  awayScore: z.number().int().min(0).nullable().optional(),
   status: z.enum(["available", "limited", "sold_out", "finished"]),
   ticketLabel: z.string().min(2).max(120),
   accentColor: z.string().min(2).max(30),

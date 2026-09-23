@@ -1,7 +1,7 @@
-import { asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq, lt, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertMatch, InsertUser, matches, users } from "../drizzle/schema";
+import { adminCredentials, InsertMatch, InsertUser, matches, users } from "../drizzle/schema";
 import { tournamentData } from "../shared/tournament-data";
 import { teamFlagCode } from "../shared/team-flags";
 import { ENV } from "./_core/env";
@@ -143,6 +143,26 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
+export async function getUserCount() {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ value: count() }).from(users);
+  return Number(result[0]?.value ?? 0);
+}
+
+export async function getAdminCredential(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(adminCredentials).where(eq(adminCredentials.email, email.toLowerCase().trim())).limit(1);
+  return result[0];
+}
+
+export async function ensureAdminCredential(email: string, passwordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("قاعدة البيانات غير متاحة");
+  await db.insert(adminCredentials).values({ email: email.toLowerCase().trim(), passwordHash }).onConflictDoUpdate({ target: adminCredentials.email, set: { passwordHash, updatedAt: new Date() } });
+}
+
 function serializeMatchInput(input: MatchInput, includeMatchNumber = false): Partial<InsertMatch> {
   const baseValues = {
     slug: input.slug,
@@ -188,6 +208,7 @@ async function ensureSeeded() {
 
 export async function listPublishedMatches() {
   await ensureSeeded();
+  await syncFinishedMatches();
   const db = await getDb();
   if (!db) return [];
   return db.select().from(matches).where(eq(matches.isPublished, true)).orderBy(asc(matches.matchDate));
@@ -195,9 +216,17 @@ export async function listPublishedMatches() {
 
 export async function listAllMatches() {
   await ensureSeeded();
+  await syncFinishedMatches();
   const db = await getDb();
   if (!db) return [];
   return db.select().from(matches).orderBy(asc(matches.matchDate));
+}
+
+export async function syncFinishedMatches() {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.update(matches).set({ status: "finished", ticketLabel: "النتيجة النهائية", updatedAt: new Date() }).where(and(lt(matches.matchDate, new Date()), ne(matches.status, "finished"))).returning({ id: matches.id });
+  return result.length;
 }
 
 export async function createMatch(input: MatchInput) {

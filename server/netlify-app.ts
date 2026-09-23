@@ -4,6 +4,7 @@ import { registerOAuthRoutes } from "./_core/oauth";
 import { registerStorageProxy } from "./_core/storageProxy";
 import { appRouter } from "./routers";
 import { createContext } from "./_core/context";
+import { registerAdminRoutes } from "./admin-routes";
 
 export function createNetlifyApp() {
   const app = express();
@@ -11,6 +12,7 @@ export function createNetlifyApp() {
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  registerAdminRoutes(app);
 
   const trpcMiddleware = createExpressMiddleware({ router: appRouter, createContext });
   app.use("/api/trpc", trpcMiddleware);
