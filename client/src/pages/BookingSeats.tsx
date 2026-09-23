@@ -36,7 +36,10 @@ export default function BookingSeats() {
     <div className="seat-options">{categories.map(item => <button key={item.id} className={`seat-option ${category === item.id ? "selected" : ""}`} onClick={() => setCategory(item.id)}><span className="seat-radio">{category === item.id && <Check size={13} />}</span><span className="seat-copy"><strong>{item.name}</strong><small>{item.description}</small></span><b>{item.price} ر.س</b></button>)}</div>
     <div className="quantity-row"><div><strong>عدد التذاكر</strong><small>بحد أقصى 10 تذاكر</small></div><div className="quantity-control"><button onClick={() => setQuantity(value => Math.max(1, value - 1))} aria-label="تقليل العدد"><Minus size={16} /></button><b>{quantity}</b><button onClick={() => setQuantity(value => Math.min(10, value + 1))} aria-label="زيادة العدد"><Plus size={16} /></button></div></div>
     <div className="booking-total"><span>الإجمالي</span><strong>{total.toLocaleString("ar-SA")} ر.س</strong></div>
-    <button className="booking-primary full" onClick={() => navigate(`/booking/details?matchId=${match.id}&category=${category}&qty=${quantity}`)}>متابعة الحجز <ArrowRight size={17} /></button>
+    <button className="booking-primary full" onClick={() => {
+      sessionStorage.setItem("pending-booking", JSON.stringify({ matchId: match.id, category, qty: quantity, unitPrice: selected.price, total: total, currency: "SAR" }));
+      navigate(`/booking/details?matchId=${match.id}&category=${category}&qty=${quantity}&total=${total}`);
+    }}>متابعة الحجز <ArrowRight size={17} /></button>
   </BookingFrame>;
 }
 

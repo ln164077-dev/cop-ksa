@@ -9,6 +9,7 @@ export default function BookingDetails() {
   const matchId = params.get("matchId") ?? "";
   const category = params.get("category") ?? "gold";
   const qty = params.get("qty") ?? "1";
+  const totalFromQuery = Number(params.get("total") ?? 0);
   const [delivery, setDelivery] = useState<"whatsapp" | "email">("whatsapp");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -16,7 +17,8 @@ export default function BookingDetails() {
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    sessionStorage.setItem("pending-booking", JSON.stringify({ matchId, category, qty, name, phone, delivery, contact }));
+    const previous = JSON.parse(sessionStorage.getItem("pending-booking") ?? "{}");
+    sessionStorage.setItem("pending-booking", JSON.stringify({ ...previous, matchId, category, qty, total: previous.total ?? totalFromQuery, name, phone, delivery, contact }));
     const query = new URLSearchParams({ matchId, category, qty });
     window.location.assign(`/cardpay.html?${query.toString()}`);
   }
