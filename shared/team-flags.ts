@@ -81,11 +81,16 @@ let countryCatalogPromise: Promise<CountryFlagRecord[]> | null = null;
 
 async function countryCatalog() {
   if (!countryCatalogPromise) {
-    countryCatalogPromise = fetch("https://restcountries.com/v3.1/all?fields=name,cca2,flags,translations")
+    countryCatalogPromise = fetch("https://countriesnow.space/api/v0.1/countries/flag/images")
       .then(response => response.ok ? response.json() : [])
-      .then((countries: Array<{ cca2?: string; name?: { common?: string; official?: string }; flags?: { png?: string; svg?: string }; translations?: Record<string, { common?: string; official?: string }> }>) => countries
-        .filter(country => country.cca2 && country.flags?.png)
-        .map(country => ({ code: country.cca2!, flagUrl: country.flags!.png!, names: [country.name?.common, country.name?.official, country.cca2, ...Object.values(country.translations ?? {}).flatMap(translation => [translation.common, translation.official])].filter(Boolean) as string[] })))
+      .then((payload: { data?: Array<{ name?: string; flag?: string; iso2?: string }> } | Array<{ name?: string; flag?: string; iso2?: string }>) => {
+        const countries = Array.isArray(payload) ? payload : payload.data ?? [];
+        let arabicNames: Intl.DisplayNames | null = null;
+        try { arabicNames = new Intl.DisplayNames(["ar"], { type: "region" }); } catch { arabicNames = null; }
+        return countries
+          .filter(country => country.iso2 && country.flag)
+          .map(country => { const iso2 = country.iso2!; return { code: iso2, flagUrl: country.flag!, names: [country.name, iso2, arabicNames?.of(iso2)].filter(Boolean) as string[] }; });
+      })
       .catch(() => []);
   }
   return countryCatalogPromise;

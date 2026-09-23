@@ -233,9 +233,10 @@ export async function syncFinishedMatches() {
 export async function createMatch(input: MatchInput) {
   const db = await getDb();
   if (!db) throw new Error("قاعدة البيانات غير متاحة");
-  const currentMax = await db.select({ value: max(matches.sortOrder) }).from(matches);
-  const nextOrder = Number(currentMax[0]?.value ?? 0) + 1;
-  const [created] = await db.insert(matches).values({ ...serializeMatchInput(input, true), sortOrder: nextOrder } as InsertMatch).returning({ id: matches.id });
+  const currentMax = await db.select({ sortOrder: max(matches.sortOrder), matchNumber: max(matches.matchNumber) }).from(matches);
+  const nextOrder = Number(currentMax[0]?.sortOrder ?? 0) + 1;
+  const nextMatchNumber = Number(currentMax[0]?.matchNumber ?? 0) + 1;
+  const [created] = await db.insert(matches).values({ ...serializeMatchInput(input, true), matchNumber: nextMatchNumber, sortOrder: nextOrder } as InsertMatch).returning({ id: matches.id });
   return { id: created.id };
 }
 
