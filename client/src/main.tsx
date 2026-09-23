@@ -43,6 +43,12 @@ const trpcClient = trpc.createClient({
       url: "/api/trpc",
       transformer: superjson,
       headers() {
+        try {
+          const adminToken = sessionStorage.getItem("admin-session-token");
+          if (adminToken) return { Authorization: `Bearer ${adminToken}` };
+        } catch {
+          // sessionStorage unavailable
+        }
         // Preview auto-login fallback: when the browser blocks iframe cookies
         // (Safari ITP / private browsing / WebView), the runtime mirrors the
         // session into sessionStorage so we can forward it as a Bearer token.

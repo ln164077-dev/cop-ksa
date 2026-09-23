@@ -7,9 +7,9 @@ export function registerAdminRoutes(app: Express) {
     const email = typeof req.body?.email === "string" ? req.body.email : "";
     const password = typeof req.body?.password === "string" ? req.body.password : "";
     if (!email || !password) return res.status(400).json({ message: "البريد وكلمة المرور مطلوبان" });
-    const user = await loginAdmin(email, password, res);
-    if (!user) return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
-    return res.json({ user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+    const result = await loginAdmin(email, password, res);
+    if (!result) return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
+    return res.json({ user: { id: result.user.id, email: result.user.email, name: result.user.name, role: result.user.role }, token: result.token });
   });
 
   app.post(["/api/admin/logout", "/admin/logout"], (_req, res) => {

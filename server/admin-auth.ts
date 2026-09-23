@@ -39,7 +39,9 @@ export async function verifyAdminSession(token: string | undefined) {
 }
 
 export async function getAdminFromRequest(req: Request): Promise<User | null> {
-  const email = await verifyAdminSession(parseCookieHeader(req.headers.cookie ?? "")[ADMIN_SESSION_COOKIE]);
+  const cookieToken = parseCookieHeader(req.headers.cookie ?? "")[ADMIN_SESSION_COOKIE];
+  const bearerToken = req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.slice(7) : undefined;
+  const email = await verifyAdminSession(cookieToken ?? bearerToken);
   if (!email) return null;
   return (await getUserByOpenId(sessionEmail(email))) ?? null;
 }
@@ -51,7 +53,8 @@ export async function loginAdmin(email: string, password: string, res: Response)
   await upsertUser({ openId: sessionEmail(normalized), email: normalized, name: "مدير الموقع", loginMethod: "admin-password", role: "admin" });
   const token = await signAdminSession(normalized);
   res.cookie(ADMIN_SESSION_COOKIE, token, { httpOnly: true, sameSite: "lax", secure: ENV.isProduction, maxAge: 7 * 24 * 60 * 60 * 1000, path: "/" });
-  return getUserByOpenId(sessionEmail(normalized));
+  const user = await getUserByOpenId(sessionEmail(normalized));
+  return user ? { user, token } : null;
 }
 
 export function logoutAdmin(res: Response) {

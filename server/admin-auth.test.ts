@@ -12,7 +12,11 @@ describe("admin login API", () => {
       body: JSON.stringify({ email, password }),
     });
     expect(response.status).toBe(200);
-    const payload = await response.json() as { user?: { role?: string } };
+    const payload = await response.json() as { user?: { role?: string }; token?: string };
     expect(payload.user?.role).toBe("admin");
+    expect(payload.token).toBeTruthy();
+    const input = encodeURIComponent(JSON.stringify({ 0: { json: null } }));
+    const list = await fetch(`http://127.0.0.1:3000/api/trpc/matches.listAdmin?batch=1&input=${input}`, { headers: { Authorization: `Bearer ${payload.token}` } });
+    expect(list.status).toBe(200);
   });
 });
