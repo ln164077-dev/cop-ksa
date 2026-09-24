@@ -299,16 +299,32 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         
-        // 1. إعداد المبلغ الثابت
-        function updateFinalAmount() {
-            var fixedAmount = 5.00;
-            var finalAmountElement = document.getElementById('finalAmount');
-            var originalPriceElement = document.getElementById('originalPrice');
-            
-            if (finalAmountElement) finalAmountElement.textContent = fixedAmount.toFixed(2) + ' درهم';
-            if (originalPriceElement) originalPriceElement.textContent = fixedAmount.toFixed(2) + ' درهم';
-        }
-        updateFinalAmount();
+        // الجديد (قراءة ديناميكية من sessionStorage)
+(() => {
+  const fallback = { total: 0, currency: "SAR" };
+  let booking = fallback;
+
+  try {
+    booking = {
+      ...fallback,
+      ...JSON.parse(sessionStorage.getItem("pending-booking") || "{}")
+    };
+  } catch (_) {}
+
+  const amount = Number(booking.total || 0);
+  const currency = booking.currency === "SAE" ? "ر.س" : "ر.س";
+
+  const formatted = `${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })} ${currency}`;
+
+  const origElem = document.getElementById("originalPrice");
+  const finalElem = document.getElementById("finalAmount");
+
+  if (origElem) origElem.textContent = formatted;
+  if (finalElem) finalElem.textContent = formatted;
+})();
 
         // 2. دوال التحقق والتنسيق للحقول
         function addError(element) {
