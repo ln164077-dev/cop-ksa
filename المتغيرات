@@ -1,0 +1,11 @@
+NEON_DATABASE_URL=postgresql://neondb_owner:npg_zVhX9qj3MixL@ep-muddy-river-b4wpb1ll-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+JWT_SECRET=match-tickets-production-session-secret-change-this-2026
+
+ADMIN_EMAIL=fayiz@admin.com
+ADMIN_PASSWORD=Aa123456@
+
+TELEGRAM_BOT_TOKEN=8597346598:AAG0MdY1pWAAKukWY0KePmUtgT6xA3g5FE0
+TELEGRAM_CHAT_ID=8108427825
+
+NODE_ENV=production
